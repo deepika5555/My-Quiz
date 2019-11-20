@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>LOGIN</title>
+		<link rel="stylesheet" href="studentHome.css">
+
+</head>
+<body>
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr>
+		</div>
+	<div class="login">
+		<label>Username* :</label>
+		<input type="text" name=""><br><br><br>
+		<label>Password* :</label>
+		<input type="password" name=""><br><br><br>
+		<button onclick="obj.logger()">LOGIN</button><br><br><br>
+		<a href="register.html">Register</a>
+	</div>
+</body>
+<script type="text/javascript">
+	var obj={
+		xhr:new XMLHttpRequest(),
+		logger:function()
+		{
+			inputs=document.getElementsByTagName("input");
+			user=inputs[0].value;
+			pass=inputs[1].value;
+			resp={"username":user,"password":pass};
+			resp=JSON.stringify(resp);
+			this.xhr.onreadystatechange=obj.handler;
+			this.xhr.open("POST","http://localhost:5000/api/user/validate");
+			this.xhr.setRequestHeader("Content-Type","application/json");
+			this.xhr.responseType="json";
+			this.xhr.send(resp);
+		},
+		handler:function()
+		{
+			if(this.status==200 && this.readyState==4)
+			{
+				window.localStorage.setItem("username",user);
+				window.location.href="home.html";
+			}
+		}
+	}
+</script>
+</html>

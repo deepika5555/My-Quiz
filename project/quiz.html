@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="jquery-3.4.1.min.js"></script>
+	<link rel="stylesheet" href="studentHome.css">
+	<title></title>
+</head>
+<body onload="obj.getTime()">
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr><div class="login">
+	<div id="timer"></div>
+	<div id="demo"></div>
+	<div id="quizTopic"></div>
+	<div id="questions">
+		<div id="question"></div>
+	</div>
+
+</body>
+<script type="text/javascript">
+	counter=1;
+	counter1=1;
+	var Time1;
+	var obj={
+		xhr:new XMLHttpRequest(),
+		x:null,
+		timer_x:null,
+		getTime:function()
+		{
+			this.xhr.onreadystatechange=obj.handlerGetTime;
+			this.number=window.localStorage.getItem("number");
+			this.username=localStorage.getItem("username");
+			this.xhr.open("GET","http://localhost:5000/api/quiz/time?number="+obj.number);
+			this.xhr.responseType="json";
+			this.xhr.send();
+		},
+		handlerGetTime:function()
+		{
+			if(this.status==200 && this.readyState==4)	
+			{
+				resp=this.response;
+				console.log(resp);
+				obj.quizTopic=resp["quizTopic"];
+				obj.reviewTime=resp["reviewTime"];
+				obj.answerTime=resp["answerTime"];
+				obj.quesCount=resp["quesCount"];
+
+				date=resp["date"].split("-");
+				console.log(date);
+				var y=parseInt(date[0]);
+				var m=parseInt(date[1]);
+				var d=parseInt(date[2]);
+				document.getElementById("quizTopic").innerHTML="<h1 class='header'> Quiz Topic : "+obj.quizTopic+"</h1><h4>Total number of questions : "+obj.quesCount+"</h4>";
+				console.log(document.getElementById("quizTopic").innerHTML);
+				time=resp["startTime"].split(":")
+				if(time[2]=="AM")
+				{
+					hr=parseInt(time[0]);
+					mm=parseInt(time[1]);
+				}
+				else
+				{
+					hr=parseInt(time[0])+12;
+					mm=parseInt(time[1]);
+				}
+				date=new Date(y,m-1,d,hr,mm,0,0);
+				curr_date=new Date().getTime();
+				console.log(y,m,d);
+				console.log(curr_date<date);
+				if(curr_date<date)
+				{
+					console.log("hi")
+					 obj.x = setInterval(obj.timer, 1000);
+				}
+				else
+				{
+					// if(obj.x)
+					// 	clearInterval(x);
+					// document.getElementById("demo").innerHTML="Time Expired";
+					$.post("setter.php",{number:obj.number,username:obj.username});
+					ev=new EventSource("getQuizQuestions.php");
+					ev.addEventListener("quiz",obj.addQuestions);
+					//ev.addEventListener("review",obj.review);
+					answered={}
+				}
+
+			}
+			else if(this.status==201 && this.readyState==4)
+			{
+				res=this.response;
+				obj.quizTopic=res["quizTopic"];
+				obj.reviewTime=res["reviewTime"];
+				obj.answerTime=res["answerTime"];
+				obj.quesCount=res["quesCount"];
+				document.getElementById("quizTopic").innerHTML="<h1 class='header'>Quiz Topic : "+obj.quizTopic+"</h1><h4>Total number of questions : "+obj.quesCount+"</h4>";
+				console.log(document.getElementById("quizTopic").innerHTML);
+				$.post("setter.php",{number:obj.number,username:obj.username});
+					ev=new EventSource("getQuizQuestions.php");
+					ev.addEventListener("quiz",obj.addQuestions);
+					//ev.addEventListener("review",obj.review);
+					answered={}
+			}
+			else if(this.status==400 && this.readyState==4)
+			{
+				alert(this.response["msg"]);
+			}
+		},
+		review:function()
+		{
+			ev1=new EventSource("review.php");
+			ev1.addEventListener("review",obj.handlerReview);
+			document.getElementById("questions").innerHTML="<div id='question'></div>";
+		},
+		handlerReview:function(event)
+		{
+
+
+			if(event.data==".....")
+			{
+				ev1.close();
+				document.getElementById("questions").innerHTML="";
+				window.location.href="home.html";
+			}
+			else
+			{
+
+				time1=obj.reviewTime;
+				if(!obj.timer_x)
+				{	
+					obj.timer_x=setInterval(obj.setTime,1000);
+				}
+			
+				list=event.data.split(";");
+				var container=document.createElement("div");
+				container.id="question";
+				var ques=document.createElement("div");
+				ques.innerHTML=counter1+") "+list[0];
+				var ans=list[1].split(";");
+				var opt=document.createElement("div");
+				for (var i = 2;i<list.length-1;i++) {
+					var ans_div_id=document.createElement("div");
+					ans_div_id.setAttribute("class","options");
+					var para=document.createElement("span");
+					para.innerHTML=list[i];
+					if(ans.indexOf(list[i])!=-1)
+					{
+						para.style.color="green";
+						
+					}
+					else if(answered[counter1].indexOf(list[i])!=-1)
+					{
+						para.style.color="red";
+					}
+
+					ans_div_id.appendChild(para);
+					opt.appendChild(ans_div_id);
+				}
+				container.appendChild(ques);
+				container.appendChild(opt);
+				console.log(order)
+				if(order[counter1-1]===0)
+				{
+					 correctness=document.createElement("p");
+					correctness.innerHTML="Wrong Answer!!!!!";
+					console.log("hh")
+				}
+				else
+				{
+					 correctness=document.createElement("p");
+					correctness.innerHTML="Correct Answer!!!!!";
+					console.log("hh")
+				}
+				console.log(correctness.innerHTML);
+				container.appendChild(correctness);
+				old=document.getElementById("question");
+				old.parentNode.replaceChild(container,old);
+				counter1++;
+			}
+		},
+		getResults:function()
+		{
+			answered[counter]=window.localStorage.getItem("number");
+			answered[counter+1]=window.localStorage.getItem("username");
+			var xhr=new XMLHttpRequest();
+			xhr.onreadystatechange=obj.handlerGetResults;
+			xhr.open("POST","http://localhost:5000/api/quiz/results");
+			xhr.setRequestHeader("Content-Type","application/json");
+			xhr.responseType="json";
+			xhr.send(JSON.stringify(answered));
+		},
+		handlerGetResults:function()
+		{
+			if(this.status==200 && this.readyState==4)
+			{
+				var ques=document.getElementById("questions");
+				ques.innerHTML="<p>You have scored "+this.response["scored"]+" out of "+this.response["total"]+"!!!!!!!!!</p>";
+				var button=document.createElement("button");
+				button.innerHTML="Review";
+				button.addEventListener("click",obj.review,false);
+				ques.appendChild(button);
+				order=this.response["order"];
+			}
+			
+		},
+		addQuestions:function(event)
+		{
+			if(event.data=="..")
+			{
+				ev.close();
+				document.getElementById("questions").innerHTML="";
+				alert("You have already completed the quiz");	
+				window.location.href="home.html";
+			}
+			console.log(answered);
+			if(event.data==".....")
+			{
+				ev.close();
+				obj.getAnswers();
+				clearInterval(obj.timer_x);
+				obj.timer_x=null;
+				document.getElementById("timer").innerHTML="";
+				document.getElementById("questions").innerHTML="";
+				var button=document.createElement("button");
+				button.innerHTML="Get Results";
+				button.addEventListener("click",obj.getResults,false);
+				document.getElementById("questions").appendChild(button);
+			}
+			else
+			{
+				time1=obj.answerTime;
+				if(!obj.timer_x)
+				{
+					obj.timer_x=setInterval(obj.setTime,1000);
+				}
+
+				obj.getAnswers();
+				list=event.data.split(";");
+				var container=document.createElement("div");
+				container.id="question";
+				var ques=document.createElement("div");
+				ques.innerHTML=counter+") "+list[0];
+				var opt=document.createElement("div");
+				for (var i = 1;i<list.length-1;i++) {
+					var ans_div_id=document.createElement("div");
+					ans_div_id.setAttribute("class","options");
+					var para=document.createElement("span");
+					para.innerHTML=list[i];
+					var checkBox=document.createElement("input");
+					checkBox.setAttribute("type","checkbox");
+					ans_div_id.appendChild(para);
+					ans_div_id.appendChild(checkBox);
+					opt.appendChild(ans_div_id);
+				}
+				container.appendChild(ques);
+				container.appendChild(opt);
+
+				old=document.getElementById("question");
+				old.parentNode.replaceChild(container,old);
+				
+			}
+		},
+		getAnswers:function()
+		{
+			checkQues=document.getElementById("question").getElementsByClassName("options");
+				if(checkQues.length!=0)
+				{
+					options=[]
+					var opt=document.getElementsByClassName("options");
+					console.log(opt.length);
+					for(var i=0;i<opt.length;i++)
+					{
+						if(opt[i].getElementsByTagName('input')[0].checked)
+						{
+							options.push(opt[i].getElementsByTagName('span')[0].innerHTML);
+						}
+					}
+					answered[counter]=options;
+					counter++;
+				}	
+				
+		},
+		timer:function()
+		{
+						curr_date=new Date().getTime();
+						var t = date - curr_date; 
+
+						var days = Math.floor(t / (1000 * 60 * 60 * 24)); 
+						var hours = Math.floor((t%(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+						var minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60)); 
+						var seconds = Math.floor((t % (1000 * 60)) / 1000); 
+						var ele=document.getElementById("demo")
+						ele.innerHTML = "Quiz will start after "+days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+						
+						//console.log(ele.innerHTML)
+						    
+		},
+		setTime:function()
+		{	--time1;
+			document.getElementById("timer").innerHTML="Remaining Time : "+time1;
+			
+		}
+	}
+</script>
+</html>

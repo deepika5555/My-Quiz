@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Profile</title>
+	<link rel="stylesheet" href="studentHome.css">
+	<style type="text/css"> 
+		label
+		{
+			color:white;
+		}
+	</style>
+</head>
+<body onload="obj.logger()">
+
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr>
+		<div>
+		
+	
+	<ul><li><a href="profile.html">Profile</a></li>
+	<li><a href="quizcatalog.html">Quiz Catalog</a></li>
+    <li><a href="quizDetails.html">New Quiz</a></li>
+<li>	<a href="getmyquiz.html">My Quizzes</a></li>
+<li>	<a href="home.html">Play Quiz</a></li>
+<li style="float:right">  <a href="logout.html">Logout</a></ul></div>
+	<br>
+	<br>
+	<div class="login">
+	<label>Username : </label><div></div><br>
+	<label>Email ID : </label><div></div><br>
+	<label>Phone :</label><div></div><br>
+	<label>DOB :</label><div></div><br>
+	</div>
+</body>
+<script type="text/javascript">
+	var obj={
+		xhr:new XMLHttpRequest(),
+		logger:function()
+		{
+			this.xhr.onreadystatechange=obj.handler;
+			this.xhr.open("GET","http://localhost:5000/api/user?username="+localStorage.getItem("username"));
+			this.xhr.responseType="json";
+			this.xhr.send();
+		},
+		handler:function()
+		{
+			if(this.status==200 && this.readyState==4)
+			{
+				var res=this.response;
+				lis=["username","emailId","phone","dob"];
+				div=document.getElementsByClassName("login")[0].getElementsByTagName("div");
+				i=0;
+				for(var x in res)
+				{
+					
+					div[i].innerHTML=res[lis[i]];
+					i++;
+				}
+			}
+		}
+	}
+</script>
+</html>

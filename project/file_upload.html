@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File Upload</title>
+	<script src="jquery-3.4.1.min.js"></script>
+			<link rel="stylesheet" href="studentHome.css">
+
+</head>
+<body>
+
+		<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr>
+			<div class="login">
+	<form id="form" method="POST" action="upload.php" enctype="multipart/form-data" ><br>
+		<input type="file" name="imgB64"><br>
+		<input type="button" value="Submit" onclick="obj.fun()"></input>
+	</form></div>
+</body>
+<script type="text/javascript">
+	// $('#form').submit(function(obj)
+	// {
+	// 	$(this).append("<input type='hidden' name='number' value="+localStorage("number")+" />")
+	// 	return true;
+	// });
+	var obj={
+		fun:function()
+		{
+			var form=document.getElementsByTagName("form")[0];
+			var inp=document.createElement("input");
+			inp.type="hidden";
+			inp.name="number";
+			inp.value=localStorage.getItem("number");
+			form.appendChild(inp);
+			form.submit()	
+		}
+	}
+</script>
+</html>

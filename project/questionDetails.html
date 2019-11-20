@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="studentHome.css">
+
+</head>
+<body>
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr>
+	<center><div id="container">
+			<label>Question *</label>
+			<div class="questions">
+				<input type="text" name="question">
+			</div><br><br>
+			<label>Answers*</label>
+			<div class="answers">
+				<div class="options">
+				<input type="text" name=""><input type="checkbox">
+				</div>
+				<div class="options">
+				<input type="text" name=""><input type="checkbox">
+				</div>
+			</div>
+	</div><br><br>
+		<button onclick="obj.AddAnswers()">+Add Answers</button><br><br>
+		<button onclick="obj.AddQuestions()">+Add Questions</button><br><br>
+		<button onclick="obj.caller()">Submit</button>
+	</center><br>
+</body>
+<script type="text/javascript">
+	var obj={
+		xhr:new XMLHttpRequest(),
+		AddAnswers:function()
+		{
+			var ele=document.getElementById("container").getElementsByClassName("answers")
+			var len=ele.length;
+
+			var div=document.createElement("div");
+			div.setAttribute("class","options");
+			var input=document.createElement("input");
+			var checkBox=document.createElement("input");
+			checkBox.setAttribute("type","checkbox");
+			div.appendChild(input);
+			div.appendChild(checkBox);
+			ele[len-1].appendChild(div);
+		},
+		AddQuestions:function()
+		{
+			var ele=document.getElementById("container");
+			var ques_label=document.createElement("label");
+			ques_label.innerHTML="Question *";
+			var ques_div=document.createElement("div");
+			ques_div.setAttribute("class","questions");
+			var ques_input=document.createElement("input");
+			ques_div.append(ques_input);
+			var ans_label=document.createElement("label");
+			ans_label.innerHTML="Answers *";
+			var ans_div=document.createElement("div");
+			ans_div.setAttribute("class","answers");
+
+			var ans_div_id=document.createElement("div");
+			ans_div_id.setAttribute("class","options");
+			var input=document.createElement("input");
+			var checkBox=document.createElement("input");
+			checkBox.setAttribute("type","checkbox");
+			ans_div_id.appendChild(input);
+			ans_div_id.appendChild(checkBox);
+			ans_div.appendChild(ans_div_id);
+			ele.appendChild(ques_label);
+			ele.appendChild(ques_div);
+			ele.appendChild(ans_label);
+			ele.appendChild(ans_div);
+
+		},
+		getAllQuestions:function()
+		{
+			list=[];
+			var ele=document.getElementById("container").getElementsByClassName("questions");
+			for(var i=0;i<ele.length;i++)
+			{
+				list.push(ele[i].getElementsByTagName("input")[0].value);
+			}
+			return list;
+		},
+		getAllAnswers:function()
+		{
+			ans=[];
+			var ele=document.getElementById("container").getElementsByClassName("answers");
+			for(var i=0;i<ele.length;i++)
+			{
+				op=[];
+				correct="";
+				var opt=ele[i].getElementsByClassName("options");
+				for(var j=0;j<opt.length;j++)
+				{
+					op.push(opt[j].getElementsByTagName("input")[0].value);
+					if(opt[j].getElementsByTagName("input")[1].checked)
+					{
+						correct+=opt[j].getElementsByTagName("input")[0].value+";";
+					}
+				}
+				op.push(correct);
+				ans.push(op);
+			}
+			return ans;
+		},
+		caller:function()
+		{
+			rep={"questions":obj.getAllQuestions(),"answers":obj.getAllAnswers(),"number":localStorage.getItem("number")};
+			req=JSON.stringify(rep);
+			this.xhr.onreadystatechange=obj.handler;
+			this.xhr.open("POST","http://localhost:5000/api/quiz/questions");
+			this.xhr.setRequestHeader("Content-Type","application/json");
+			this.xhr.responseType="json";
+			this.xhr.send(req);
+		},
+		handler:function()
+		{
+			if(this.readyState==4 && this.status==201)
+			{
+				console.log(this.response);
+				alert("Quiz Successfully Scheduled");
+				window.location.href="home.html";
+			}
+		}
+	}
+	
+</script>
+</html>

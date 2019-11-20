@@ -1,0 +1,42 @@
+<?php session_start();?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HOME</title>
+		<link rel="stylesheet" href="studentHome.css">
+
+</head>
+<body>
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  					</div> 
+      			
+			<hr>
+		<div>
+		
+	
+	<ul><li><a href="profile.html">Profile</a></li>
+	<li><a href="quizcatalog.html">Quiz Catalog</a></li>
+    <li><a href="quizDetails.html">New Quiz</a></li>
+<li>	<a href="getmyquiz.html">My Quizzes</a></li>
+<li>	<a href="home.html">Play Quiz</a></li>
+<li style="float:right">  <a href="logout.php">Logout</a></ul></div>
+	<div class="login">
+	ENTER QUIZ ID<br><br><input type="text" name="">
+	<br><br><button onclick="obj.getQuiz()">Start Quiz</button>
+	</div>
+</body>
+<script type="text/javascript">
+	var obj={
+		getQuiz:function()
+		{
+			inputs=document.getElementsByTagName("input");
+			number=inputs[0].value;
+			localStorage.setItem("number",number);
+			window.location.href="quiz.html";
+		}
+	}
+</script>
+</html>

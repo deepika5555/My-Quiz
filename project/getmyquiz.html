@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="studentHome.css">
+
+	<title></title>
+</head>
+<body onload="obj.numbers()">
+	<div class="body">
+			
+			<center>	<img class="logo" src="myquiz.jpg" alt="Logo" width="200px" heigth="200px" ></center>
+				
+  	</div> 
+      			
+	<div>
+	<div>
+		
+		
+		<ul><li><a href="profile.html">Profile</a></li>
+		<li><a href="quizcatalog.html">Quiz Catalog</a></li>
+	    <li><a href="quizDetails.html">New Quiz</a></li>
+		<li><a href="getmyquiz.html">My Quizzes</a></li>
+		<li><a href="home.html">Play Quiz</a></li>
+		<li style="float:right">  <a href="logout.html">Logout</a></ul>
+
+	</div>
+
+	<div class="login">
+		<div class="quiz"></div>
+	</div>
+</body>
+<script type="text/javascript">
+	var obj={
+		xhr:new XMLHttpRequest(),
+		numbers:function()
+		{
+			this.xhr.onreadystatechange=obj.handler;
+			this.xhr.open("GET","http://localhost:5000/api/user/number?username="+localStorage.getItem("username"));
+			this.xhr.responseType="json";
+			this.xhr.send();
+		},
+		handler:function()
+		{
+			if(this.status==200 && this.readyState==4)
+			{
+					div=document.getElementsByClassName("quiz")[0];
+					for(x in this.response)
+					{	div1=document.createElement("div");
+						p1=document.createElement("div");
+						p1.innerHTML="Quiz Number : "+x;
+						console.log(x)
+						p2=document.createElement("div");
+						p2.innerHTML="Date : "+this.response[x][0];
+						p3=document.createElement("div");
+						p3.innerHTML="Start Time : "+this.response[x][1]+"";
+						div1.appendChild(p1);
+						div1.appendChild(p2);
+						div1.appendChild(p3);
+						div.appendChild(div1);
+					}
+			}
+			else if(this.readyState==4 && this.status==403)
+			{
+				document.getElementsByTagName("p")[0].innerHTML="No Quiz is registered";
+			}
+		}
+	}
+</script>
+</html>
